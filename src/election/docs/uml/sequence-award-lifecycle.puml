@@ -1,0 +1,65 @@
+@startuml sequence-award-lifecycle
+title Award Lifecycle — Sequence Diagram
+
+skinparam sequenceArrowThickness 1.5
+
+actor       "Organiser"       as O
+actor       "Voter"           as V
+participant "AwardController"  as AC
+participant "VotingController" as VC
+participant "ResultsController" as RC
+participant "AwardService"     as AS
+participant "VotingService"    as VS
+participant "ResultsService"   as RS
+
+== Setup ==
+O -> AC : POST /awards\n{title, nominees, anonymous}
+AC -> AS : createAward(title, nominees, anonymous)
+AS --> AC : Award (status=PENDING)
+AC --> O  : 201 Award
+
+== Open for Voting ==
+O -> AC : PATCH /awards/{id}/open
+AC -> AS : openAward(id)
+AS -> AS : status PENDING → OPEN
+AS --> AC : void
+AC --> O  : 204
+
+== Voting Phase ==
+V -> VC : POST /votes\n{voterId, awardId, nomineeName}
+VC -> VS : castVote(...)
+VS --> VC : Vote
+VC --> V  : 201 Vote
+
+note over V : Other voters cast their votes...
+
+== Close Voting ==
+O -> AC : PATCH /awards/{id}/close
+AC -> AS : closeAward(id)
+AS -> AS : status OPEN → CLOSED
+AS --> AC : void
+AC --> O  : 204
+
+== Reveal Results (Oscars Moment) ==
+O -> RC : GET /results/{id}/winner
+RC -> RS : declareWinner(id)
+RS -> RS : check isRevealed() → false
+RS --> RC : throws ElectionException
+RC --> O  : 400 {"error": "Results have not been revealed yet."}
+
+O -> AC : PATCH /awards/{id}/reveal
+AC -> AS : revealAward(id)
+AS -> AS : revealed = true
+AC --> O  : 204
+
+O -> RC : GET /results/{id}/winner
+RC -> RS : declareWinner(id)
+RS --> RC : {tie, winner/tiedNominees, votes}
+RC --> O  : 200 winner result
+
+O -> RC : GET /results/summary
+RC -> RS : getSummary()
+RS --> RC : formatted string
+RC --> O  : 200 full summary
+
+@enduml

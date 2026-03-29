@@ -1,0 +1,211 @@
+@startuml class-diagram
+title Graduating Class Awards — Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+    BackgroundColor White
+    BorderColor #444
+    ArrowColor #444
+}
+skinparam package {
+    BackgroundColor #F8F8FF
+    BorderColor #888
+}
+
+' ─── MODEL ───────────────────────────────────────────────
+package "model" {
+
+    enum AwardStatus {
+        PENDING
+        OPEN
+        CLOSED
+    }
+
+    class Award {
+        - id : String
+        - title : String
+        - nominees : List<String>
+        - status : AwardStatus
+        - revealed : boolean
+        - anonymous : boolean
+        + getId() : String
+        + getTitle() : String
+        + getNominees() : List<String>
+        + getStatus() : AwardStatus
+        + isRevealed() : boolean
+        + isAnonymous() : boolean
+        + setStatus(AwardStatus)
+        + setRevealed(boolean)
+    }
+
+    class Voter {
+        - id : String
+        - name : String
+        - studentId : String
+        - active : boolean
+        + getId() : String
+        + getName() : String
+        + getStudentId() : String
+        + isActive() : boolean
+        + setActive(boolean)
+    }
+
+    class Vote {
+        - id : String
+        - voterId : String
+        - awardId : String
+        - nomineeName : String
+        + getId() : String
+        + getVoterId() : String
+        + getAwardId() : String
+        + getNomineeName() : String
+    }
+
+    Award --> AwardStatus : status
+}
+
+' ─── EXCEPTION ───────────────────────────────────────────
+package "exception" {
+    class ElectionException {
+        + ElectionException(message : String)
+    }
+
+    class GlobalExceptionHandler {
+        + handleElectionException(ElectionException) : Map
+        + handleMalformedJson(HttpMessageNotReadableException) : Map
+    }
+}
+
+' ─── REPOSITORY ──────────────────────────────────────────
+package "repository" {
+
+    class AwardRepository {
+        - store : Map<String, Award>
+        + save(Award) : Award
+        + findById(String) : Optional<Award>
+        + findAll() : List<Award>
+        + deleteById(String)
+        + clear()
+    }
+
+    class VoterRepository {
+        - store : Map<String, Voter>
+        + save(Voter) : Voter
+        + findById(String) : Optional<Voter>
+        + findByStudentId(String) : Optional<Voter>
+        + findAll() : List<Voter>
+        + clear()
+    }
+
+    class VoteRepository {
+        - store : List<Vote>
+        + save(Vote) : Vote
+        + findByAwardId(String) : List<Vote>
+        + existsByVoterIdAndAwardId(String, String) : boolean
+        + findAll() : List<Vote>
+        + clear()
+    }
+}
+
+' ─── SERVICE ─────────────────────────────────────────────
+package "service" {
+
+    class AwardService {
+        + createAward(title, nominees, anonymous) : Award
+        + getAward(id) : Award
+        + listAwards() : List<Award>
+        + openAward(id)
+        + closeAward(id)
+        + revealAward(id)
+        + deleteAward(id)
+    }
+
+    class VoterService {
+        + registerVoter(name, studentId) : Voter
+        + getVoter(id) : Voter
+        + listVoters() : List<Voter>
+        + deactivateVoter(id)
+    }
+
+    class VotingService {
+        + castVote(voterId, awardId, nomineeName) : Vote
+    }
+
+    class ResultsService {
+        + getResults(awardId) : Map
+        + declareWinner(awardId) : Map
+        + getStats(awardId) : Map<String, Double>
+        + getClassMvp() : String
+        + getSweep() : Map<String, List<String>>
+        + getMostNominated() : String
+        + getUnderdogs() : Map<String, List<String>>
+        + getSummary() : String
+    }
+}
+
+' ─── CONTROLLER ──────────────────────────────────────────
+package "controller" {
+
+    class AwardController {
+        + createAward(body) : Award
+        + listAwards() : List<Award>
+        + getAward(id) : Award
+        + deleteAward(id)
+        + openAward(id)
+        + closeAward(id)
+        + revealAward(id)
+    }
+
+    class VoterController {
+        + registerVoter(body) : Voter
+        + listVoters() : List<Voter>
+        + getVoter(id) : Voter
+        + deactivateVoter(id)
+    }
+
+    class VotingController {
+        + castVote(body) : Vote
+    }
+
+    class ResultsController {
+        + getResults(awardId) : Map
+        + declareWinner(awardId) : Map
+        + getStats(awardId) : Map
+        + getClassMvp() : Map
+        + getSweep() : Map
+        + getMostNominated() : Map
+        + getUnderdogs() : Map
+        + getSummary() : Map
+    }
+}
+
+' ─── RELATIONSHIPS ───────────────────────────────────────
+AwardRepository "1" --o "many" Award : stores
+VoterRepository "1" --o "many" Voter : stores
+VoteRepository  "1" --o "many" Vote  : stores
+
+AwardService  --> AwardRepository
+VoterService  --> VoterRepository
+VotingService --> VoteRepository
+VotingService --> AwardService
+VotingService --> VoterService
+ResultsService --> VoteRepository
+ResultsService --> AwardService
+
+AwardController   --> AwardService
+VoterController   --> VoterService
+VotingController  --> VotingService
+ResultsController --> ResultsService
+
+AwardService  ..> ElectionException : throws
+VoterService  ..> ElectionException : throws
+VotingService ..> ElectionException : throws
+ResultsService ..> ElectionException : throws
+
+GlobalExceptionHandler ..> ElectionException : handles
+
+Vote ..> Voter : voterId ref
+Vote ..> Award : awardId ref
+
+@enduml
