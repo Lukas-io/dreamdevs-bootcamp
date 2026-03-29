@@ -91,6 +91,11 @@ public class ResultsService {
         }
 
         Map<String, Long> tally = tallyVotes(awardId);
+
+        if (tally.isEmpty()) {
+            throw new ElectionException("No votes have been cast for '" + award.getTitle() + "'.");
+        }
+
         long total = tally.values().stream().mapToLong(Long::longValue).sum();
 
         Map<String, Double> stats = new LinkedHashMap<>();
@@ -176,7 +181,7 @@ public class ResultsService {
                     .filter(e -> e.getValue() == 1)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
-            underdogs.put(award.getId(), underdogNominees);
+            underdogs.put(award.getTitle(), underdogNominees);
         }
         return underdogs;
     }

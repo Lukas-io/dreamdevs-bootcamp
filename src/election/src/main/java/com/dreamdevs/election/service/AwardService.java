@@ -24,6 +24,11 @@ public class AwardService {
         if (nominees == null || nominees.isEmpty()) {
             throw new ElectionException("An award must have at least one nominee.");
         }
+        for (String nominee : nominees) {
+            if (nominee == null || nominee.isBlank()) {
+                throw new ElectionException("Nominee names cannot be blank.");
+            }
+        }
         Award award = new Award(title, nominees, anonymous);
         return awardRepository.save(award);
     }

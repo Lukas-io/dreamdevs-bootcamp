@@ -273,9 +273,9 @@ class ResultsServiceTest {
 
         Map<String, List<String>> underdogs = resultsService.getUnderdogs();
 
-        assertTrue(underdogs.get(award.getId()).contains("Amaka Obi"));
-        assertFalse(underdogs.get(award.getId()).contains("Tunde Bakare"));
-        assertFalse(underdogs.get(award.getId()).contains("Seun Kuti"));
+        assertTrue(underdogs.get(award.getTitle()).contains("Amaka Obi"));
+        assertFalse(underdogs.get(award.getTitle()).contains("Tunde Bakare"));
+        assertFalse(underdogs.get(award.getTitle()).contains("Seun Kuti"));
     }
 
     @Test
@@ -289,6 +289,18 @@ class ResultsServiceTest {
 
         Map<String, List<String>> underdogs = resultsService.getUnderdogs();
 
-        assertTrue(underdogs.getOrDefault(award.getId(), List.of()).isEmpty());
+        assertTrue(underdogs.getOrDefault(award.getTitle(), List.of()).isEmpty());
+    }
+
+    // --- Stats with no votes ---
+
+    @Test
+    void getStats_whenNoVotesCast_throwsElectionException() {
+        Award award = awardService.createAward("Empty Award", List.of("Kemi", "Femi"), false);
+        awardService.openAward(award.getId());
+        awardService.closeAward(award.getId());
+        awardService.revealAward(award.getId());
+
+        assertThrows(ElectionException.class, () -> resultsService.getStats(award.getId()));
     }
 }

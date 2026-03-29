@@ -63,6 +63,23 @@ class AwardServiceTest {
     }
 
     @Test
+    void createAward_withBlankNomineeName_throwsElectionException() {
+        assertThrows(ElectionException.class, () ->
+                awardService.createAward("Best Dressed", List.of("  ", "Valid Name"), false)
+        );
+    }
+
+    @Test
+    void createAward_withNullNomineeName_throwsElectionException() {
+        List<String> nominees = new java.util.ArrayList<>();
+        nominees.add(null);
+        nominees.add("Valid Name");
+        assertThrows(ElectionException.class, () ->
+                awardService.createAward("Best Dressed", nominees, false)
+        );
+    }
+
+    @Test
     void openAward_changeStatusToOpen() {
         Award award = awardService.createAward("Most Successful", List.of("Chidi", "Ngozi"), false);
 
