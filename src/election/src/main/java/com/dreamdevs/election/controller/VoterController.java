@@ -34,7 +34,7 @@ public class VoterController {
         return voterService.getVoter(id);
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deactivateVoter(@PathVariable String id) {
         voterService.deactivateVoter(id);

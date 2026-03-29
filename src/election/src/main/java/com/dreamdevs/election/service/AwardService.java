@@ -6,6 +6,7 @@ import com.dreamdevs.election.model.AwardStatus;
 import com.dreamdevs.election.repository.AwardRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -28,6 +29,9 @@ public class AwardService {
             if (nominee == null || nominee.isBlank()) {
                 throw new ElectionException("Nominee names cannot be blank.");
             }
+        }
+        if (new HashSet<>(nominees).size() < nominees.size()) {
+            throw new ElectionException("Nominee list contains duplicates.");
         }
         Award award = new Award(title, nominees, anonymous);
         return awardRepository.save(award);

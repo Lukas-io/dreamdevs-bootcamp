@@ -39,8 +39,6 @@ public class ResultsService {
             Map<String, Object> entry = new LinkedHashMap<>();
             if (!award.isAnonymous()) {
                 entry.put("voterId", vote.getVoterId());
-            } else {
-                entry.put("voterId", null);
             }
             entry.put("nomineeName", vote.getNomineeName());
             voteDetails.add(entry);
@@ -157,7 +155,7 @@ public class ResultsService {
 
         Map<String, Long> nominationCount = new HashMap<>();
         for (Award award : awards) {
-            for (String nominee : award.getNominees()) {
+            for (String nominee : new HashSet<>(award.getNominees())) {
                 nominationCount.merge(nominee, 1L, Long::sum);
             }
         }
