@@ -1,0 +1,88 @@
+@startuml sequence-cast-vote
+title Cast Vote — Sequence Diagram
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceParticipant underline
+
+actor       "Client"          as C
+participant "VotingController" as VC
+participant "VotingService"    as VS
+participant "VoterService"     as VoS
+participant "AwardService"     as AS
+participant "VoteRepository"   as VR
+participant "VoterRepository"  as VoR
+participant "AwardRepository"  as AR
+
+C -> VC : POST /votes\n{voterId, awardId, nomineeName}
+
+VC -> VC : validate fields\n(not null / blank)
+
+alt missing field
+    VC --> C : 400 {"error": "X is required."}
+end
+
+VC -> VS : castVote(voterId, awardId, nomineeName)
+
+VS -> VoS : getVoter(voterId)
+VoS -> VoR : findById(voterId)
+VoR --> VoS : Optional<Voter>
+
+alt voter not found
+    VoS --> VS : throws ElectionException
+    VS --> VC : propagates
+    VC --> C : 400 {"error": "Voter not found: ..."}
+end
+
+VoS --> VS : Voter
+
+VS -> VS : check voter.isActive()
+alt voter deactivated
+    VS --> VC : throws ElectionException
+    VC --> C : 400 {"error": "Voter '...' is deactivated"}
+end
+
+VS -> AS : getAward(awardId)
+AS -> AR : findById(awardId)
+AR --> AS : Optional<Award>
+
+alt award not found
+    AS --> VS : throws ElectionException
+    VS --> VC : propagates
+    VC --> C : 400 {"error": "Award not found: ..."}
+end
+
+AS --> VS : Award
+
+VS -> VS : check award.status == PENDING?
+alt status is PENDING
+    VS --> VC : throws ElectionException
+    VC --> C : 400 {"error": "Voting has not started yet..."}
+end
+
+VS -> VS : check award.status == CLOSED?
+alt status is CLOSED
+    VS --> VC : throws ElectionException
+    VC --> C : 400 {"error": "Voting has already closed..."}
+end
+
+VS -> VS : check nominees.contains(nomineeName)
+alt nominee not in list
+    VS --> VC : throws ElectionException
+    VC --> C : 400 {"error": "'...' is not a nominee for '...'"}
+end
+
+VS -> VR : existsByVoterIdAndAwardId(voterId, awardId)
+VR --> VS : boolean
+
+alt already voted
+    VS --> VC : throws ElectionException
+    VC --> C : 400 {"error": "You have already voted for '...'"}
+end
+
+VS -> VR : save(new Vote(voterId, awardId, nomineeName))
+VR --> VS : Vote
+
+VS --> VC : Vote
+VC --> C : 201 {id, voterId, awardId, nomineeName}
+
+@enduml
