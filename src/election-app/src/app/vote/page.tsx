@@ -38,21 +38,17 @@ export default function VotePage() {
 
   const handleVoterSelect = async (voter: Voter) => {
     setSelectedVoter(voter);
-    // Detect which open non-anonymous awards this voter already voted in
+    setStep(2);
     const open = awards.filter((a) => a.status === "OPEN" && !a.anonymous);
-    const voted: string[] = [];
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       open.map(async (award) => {
-        try {
-          const res = await resultsApi.forAward(award.id);
-          if (res.votes?.some((v) => v.voterId === voter.id)) {
-            voted.push(award.id);
-          }
-        } catch { /* ignore */ }
+        const res = await resultsApi.forAward(award.id);
+        return res.votes?.some((v) => v.voterId === voter.id) ? award.id : null;
       })
     );
-    setVotedAwardIds(voted);
-    setStep(2);
+    setVotedAwardIds(
+      results.flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []))
+    );
   };
 
   const handleVote = async (nomineeName: string) => {

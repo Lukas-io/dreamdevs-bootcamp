@@ -26,27 +26,30 @@ export function AwardSelect({ awards, onSelect, votedAwardIds = [] }: AwardSelec
   return (
     <div className="flex flex-col gap-2">
       {open.map((award) => {
-        const alreadyVoted = votedAwardIds.includes(award.id);
-        return alreadyVoted ? (
-          <div
-            key={award.id}
-            className="flex items-center justify-between px-4 py-4 bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 rounded-xl opacity-60 cursor-not-allowed"
-          >
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-                {award.title}
-              </p>
-              <p className="flex items-center gap-1 text-xs text-neutral-400">
-                <Users size={11} />
-                {award.nominees.length} nominee{award.nominees.length !== 1 ? "s" : ""}
-              </p>
+        const nomineeText = `${award.nominees.length} nominee${award.nominees.length !== 1 ? "s" : ""}`;
+
+        if (votedAwardIds.includes(award.id)) {
+          return (
+            <div
+              key={award.id}
+              className="flex items-center justify-between px-4 py-4 bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 rounded-xl opacity-60 cursor-not-allowed"
+            >
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-neutral-900 dark:text-white">{award.title}</p>
+                <p className="flex items-center gap-1 text-xs text-neutral-400">
+                  <Users size={11} />
+                  {nomineeText}
+                </p>
+              </div>
+              <span className="flex items-center gap-1 text-xs text-green-500 font-medium shrink-0">
+                <CheckCircle size={13} />
+                Already voted
+              </span>
             </div>
-            <span className="flex items-center gap-1 text-xs text-green-500 font-medium shrink-0">
-              <CheckCircle size={13} />
-              Already voted
-            </span>
-          </div>
-        ) : (
+          );
+        }
+
+        return (
           <button
             key={award.id}
             onClick={() => onSelect(award)}
@@ -58,7 +61,7 @@ export function AwardSelect({ awards, onSelect, votedAwardIds = [] }: AwardSelec
               </p>
               <p className="flex items-center gap-1 text-xs text-neutral-400">
                 <Users size={11} />
-                {award.nominees.length} nominee{award.nominees.length !== 1 ? "s" : ""}
+                {nomineeText}
               </p>
             </div>
             <ChevronRight size={16} className="text-neutral-300 group-hover:text-violet-400 shrink-0" />
