@@ -15,7 +15,7 @@ export function VoteLog({ results }: VoteLogProps) {
     <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
       {results.votes.map((vote, i) => (
         <div
-          key={i}
+          key={`${vote.nomineeName}-${vote.voterId ?? i}`}
           className="flex items-center justify-between py-2 px-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg"
         >
           <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">

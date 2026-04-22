@@ -46,14 +46,18 @@ export function Modal({
       <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
       <div
         ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
         className={`relative w-full ${sizes[size]} bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-xl flex flex-col max-h-[90vh]`}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
-          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 id="modal-title" className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
             {title}
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
           >
             <X size={16} />

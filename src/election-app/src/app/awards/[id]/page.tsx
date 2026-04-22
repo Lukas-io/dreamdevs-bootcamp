@@ -12,6 +12,7 @@ import { StatsChart } from "@/components/results/StatsChart";
 import { VoteLog } from "@/components/results/VoteLog";
 import { Spinner } from "@/components/ui/Spinner";
 import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type BadgeVariant = "PENDING" | "OPEN" | "CLOSED" | "REVEALED";
 
@@ -22,6 +23,7 @@ function getVariant(award: Award): BadgeVariant {
 
 export default function AwardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { addToast } = useToast();
   const [award, setAward] = useState<Award | null>(null);
   const [results, setResults] = useState<AwardResults | null>(null);
   const [winner, setWinner] = useState<WinnerResult | null>(null);
@@ -44,8 +46,8 @@ export default function AwardDetailPage({ params }: { params: Promise<{ id: stri
         if (w.status === "fulfilled") setWinner(w.value);
         if (s.status === "fulfilled") setStats(s.value);
       }
-    } catch {
-      // award not found
+    } catch (e) {
+      addToast(e instanceof Error ? e.message : "Failed to load award", "error");
     }
     setLoading(false);
   };

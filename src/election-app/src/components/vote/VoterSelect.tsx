@@ -27,6 +27,7 @@ export function VoterSelect({ voters, onSelect }: VoterSelectProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name or student ID…"
+          aria-label="Search voters"
           className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:border-neutral-400 dark:focus:border-neutral-500 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400"
         />
       </div>
