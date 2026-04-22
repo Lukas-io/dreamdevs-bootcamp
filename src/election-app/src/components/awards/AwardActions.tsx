@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import { Lock, Eye, Play, Square, Trash2 } from "lucide-react";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface AwardActionsProps {
   award: Award;
@@ -74,15 +75,17 @@ export function AwardActions({ award, onMutate, compact = false }: AwardActionsP
         )}
 
         {status === "CLOSED" && !revealed && (
-          <Button
-            size={size}
-            variant="primary"
-            icon={<Eye size={13} />}
-            loading={loading === "reveal"}
-            onClick={() => act("reveal", () => awardsApi.reveal(award.id), "Results revealed! 🎉")}
-          >
-            Reveal Results
-          </Button>
+          <Tooltip content="Permanently reveals the winner to everyone. This cannot be undone." position="top">
+            <Button
+              size={size}
+              variant="primary"
+              icon={<Eye size={13} />}
+              loading={loading === "reveal"}
+              onClick={() => act("reveal", () => awardsApi.reveal(award.id), "Results revealed! 🎉")}
+            >
+              Reveal Results
+            </Button>
+          </Tooltip>
         )}
 
         {status === "CLOSED" && revealed && (

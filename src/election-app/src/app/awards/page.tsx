@@ -8,7 +8,7 @@ import { CreateAwardModal } from "@/components/awards/CreateAwardModal";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Plus, Trophy } from "lucide-react";
+import { Plus, Trophy, ChevronRight as Chevron } from "lucide-react";
 
 type Filter = "ALL" | "PENDING" | "OPEN" | "CLOSED" | "REVEALED";
 
@@ -51,6 +51,16 @@ export default function AwardsPage() {
         <Button icon={<Plus size={14} />} onClick={() => setShowCreate(true)}>
           Create Award
         </Button>
+      </div>
+
+      <div className="flex items-center gap-1 text-xs text-neutral-400 flex-wrap">
+        {(["Pending", "Open", "Closed", "Revealed"] as const).map((s, i, arr) => (
+          <span key={s} className="flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">{s}</span>
+            {i < arr.length - 1 && <Chevron size={10} className="text-neutral-300 dark:text-neutral-600" />}
+          </span>
+        ))}
+        <span className="text-neutral-300 dark:text-neutral-600 ml-1">← award lifecycle</span>
       </div>
 
       <div className="flex gap-1 overflow-x-auto pb-1">

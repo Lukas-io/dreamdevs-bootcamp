@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { awardsApi, votersApi, votesApi } from "@/lib/api";
+import { awardsApi, votersApi, votesApi, resultsApi } from "@/lib/api";
 import { Award, Voter } from "@/lib/types";
 import { VoterSelect } from "@/components/vote/VoterSelect";
 import { AwardSelect } from "@/components/vote/AwardSelect";
@@ -20,6 +20,7 @@ export default function VotePage() {
   const [step, setStep] = useState<Step>(1);
   const [selectedVoter, setSelectedVoter] = useState<Voter | null>(null);
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
+  const [votedAwardIds, setVotedAwardIds] = useState<string[]>([]);
   const [votingLoading, setVotingLoading] = useState(false);
 
   const load = async () => {
@@ -34,6 +35,25 @@ export default function VotePage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleVoterSelect = async (voter: Voter) => {
+    setSelectedVoter(voter);
+    // Detect which open non-anonymous awards this voter already voted in
+    const open = awards.filter((a) => a.status === "OPEN" && !a.anonymous);
+    const voted: string[] = [];
+    await Promise.allSettled(
+      open.map(async (award) => {
+        try {
+          const res = await resultsApi.forAward(award.id);
+          if (res.votes?.some((v) => v.voterId === voter.id)) {
+            voted.push(award.id);
+          }
+        } catch { /* ignore */ }
+      })
+    );
+    setVotedAwardIds(voted);
+    setStep(2);
+  };
 
   const handleVote = async (nomineeName: string) => {
     if (!selectedVoter || !selectedAward) return;
@@ -56,6 +76,7 @@ export default function VotePage() {
     setStep(1);
     setSelectedVoter(null);
     setSelectedAward(null);
+    setVotedAwardIds([]);
     load();
   };
 
@@ -123,10 +144,7 @@ export default function VotePage() {
               </div>
               <VoterSelect
                 voters={voters}
-                onSelect={(voter) => {
-                  setSelectedVoter(voter);
-                  setStep(2);
-                }}
+                onSelect={handleVoterSelect}
               />
             </div>
           )}
@@ -148,6 +166,7 @@ export default function VotePage() {
                   setSelectedAward(award);
                   setStep(3);
                 }}
+                votedAwardIds={votedAwardIds}
               />
             </div>
           )}

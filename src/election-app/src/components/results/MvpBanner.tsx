@@ -1,6 +1,7 @@
 "use client";
 
-import { Crown } from "lucide-react";
+import { Crown, Info } from "lucide-react";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface MvpBannerProps {
   mvp: string;
@@ -13,7 +14,12 @@ export function MvpBanner({ mvp }: MvpBannerProps) {
         <Crown size={24} />
       </div>
       <div>
-        <p className="text-xs font-medium opacity-80 uppercase tracking-wider">Class MVP</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-xs font-medium opacity-80 uppercase tracking-wider">Class MVP</p>
+          <Tooltip content="Most Valuable Participant — the person with the most total votes across all revealed awards." position="bottom">
+            <Info size={12} className="opacity-60 cursor-help" />
+          </Tooltip>
+        </div>
         <p className="text-2xl font-bold">{mvp}</p>
       </div>
     </div>

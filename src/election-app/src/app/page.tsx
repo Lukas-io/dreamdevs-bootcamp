@@ -102,15 +102,28 @@ export default function Dashboard() {
             </div>
 
             {awards.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-12 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl">
-                <Trophy size={32} className="text-neutral-300 dark:text-neutral-700" />
-                <div>
-                  <p className="text-sm text-neutral-500">No awards yet</p>
-                  <p className="text-xs text-neutral-400">Create your first award to get started</p>
+              <div className="flex flex-col gap-4 py-8 px-6 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <Trophy size={20} className="text-violet-400 shrink-0" />
+                  <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Getting started</p>
                 </div>
-                <Link href="/awards" className="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-200 transition-colors">
-                  Go to Awards
-                </Link>
+                <div className="flex flex-col gap-2.5">
+                  {[
+                    { n: 1, label: "Create awards", href: "/awards", hint: "Add nominees and configure each superlative" },
+                    { n: 2, label: "Register voters", href: "/voters", hint: "Add students who will cast votes" },
+                    { n: 3, label: "Open voting", href: "/awards", hint: "Activate awards so voters can participate" },
+                    { n: 4, label: "Cast votes", href: "/vote", hint: "Each voter picks their nominee per award" },
+                    { n: 5, label: "Reveal results", href: "/awards", hint: "Close awards and reveal winners publicly" },
+                  ].map((step) => (
+                    <Link key={step.n} href={step.href} className="flex items-start gap-3 group">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500 text-xs font-bold flex items-center justify-center mt-0.5 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30 group-hover:text-violet-600 transition-colors">{step.n}</span>
+                      <div>
+                        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">{step.label}</p>
+                        <p className="text-xs text-neutral-400">{step.hint}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

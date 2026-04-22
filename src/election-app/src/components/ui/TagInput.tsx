@@ -75,9 +75,11 @@ export function TagInput({
         />
       </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
-      {value.length > 0 && (
-        <p className="text-xs text-neutral-400">{value.length} nominee{value.length !== 1 ? "s" : ""} added</p>
-      )}
+      <p className="text-xs text-neutral-400">
+        {value.length > 0
+          ? `${value.length} nominee${value.length !== 1 ? "s" : ""} · Backspace to remove last`
+          : "Press Enter or , to add · Backspace to remove last"}
+      </p>
     </div>
   );
 }

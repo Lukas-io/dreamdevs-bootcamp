@@ -50,6 +50,7 @@ export function VoterCard({ voter, onMutate }: VoterCardProps) {
               variant="ghost"
               icon={<UserX size={13} />}
               onClick={() => setConfirm(true)}
+              className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
             />
           )}
         </div>

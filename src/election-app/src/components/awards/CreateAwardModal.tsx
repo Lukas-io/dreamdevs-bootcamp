@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/Input";
 import { TagInput } from "@/components/ui/TagInput";
 import { awardsApi } from "@/lib/api";
 import { useToast } from "@/components/ui/ToastProvider";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Info } from "lucide-react";
 
 interface CreateAwardModalProps {
   open: boolean;
@@ -90,7 +92,12 @@ export function CreateAwardModal({ open, onClose, onCreated }: CreateAwardModalP
               className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${anonymous ? "translate-x-4" : ""}`}
             />
           </div>
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">Anonymous voting</span>
+          <span className="flex items-center gap-1.5 text-sm text-neutral-700 dark:text-neutral-300">
+            Anonymous voting
+            <Tooltip content="Votes are recorded without attaching voter names — nobody can see who voted for whom." position="top">
+              <Info size={13} className="text-neutral-400 cursor-help" />
+            </Tooltip>
+          </span>
         </label>
         {anonymous && (
           <p className="text-xs text-neutral-400 -mt-2">Voter identities will be hidden in the results.</p>

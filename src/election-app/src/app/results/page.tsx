@@ -11,7 +11,8 @@ import { WinnerCard } from "@/components/results/WinnerCard";
 import { SummaryBlock } from "@/components/results/SummaryBlock";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BarChart, Users, ChevronRight, Shield, TrendingUp, Tag } from "lucide-react";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { BarChart, Users, ChevronRight, Shield, TrendingUp, Tag, Info } from "lucide-react";
 
 interface AwardResultData {
   award: Award;
@@ -85,7 +86,7 @@ export default function ResultsPage() {
         <EmptyState
           icon={<BarChart size={32} />}
           title="No results yet"
-          description="Results will appear here once awards are closed and revealed."
+          description="Results appear here once awards are closed and their results revealed. Head to Awards to manage the lifecycle."
           action={
             <Link href="/awards" className="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-700 transition-colors">
               Go to Awards <ChevronRight size={14} />
@@ -102,8 +103,13 @@ export default function ResultsPage() {
                 <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                   <Tag size={18} className="text-blue-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-blue-500 uppercase tracking-wider font-medium">Most Nominated</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs text-blue-500 uppercase tracking-wider font-medium">Most Nominated</p>
+                    <Tooltip content="The person who appeared as a nominee in the most awards." position="top">
+                      <Info size={11} className="text-neutral-400 cursor-help" />
+                    </Tooltip>
+                  </div>
                   <p className="text-base font-bold text-neutral-900 dark:text-white">{mostNominated}</p>
                 </div>
               </div>
@@ -113,6 +119,9 @@ export default function ResultsPage() {
               <div className="flex items-center gap-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
                 <Shield size={15} className="text-rose-500" />
                 Underdogs
+                <Tooltip content="Nominees who received exactly one vote — the dark horses of the election." position="top">
+                  <Info size={13} className="text-neutral-400 cursor-help" />
+                </Tooltip>
               </div>
               {Object.entries(underdogs).filter(([, names]) => names.length > 0).length === 0 ? (
                 <p className="text-xs text-neutral-400 italic">No underdogs found.</p>
@@ -137,6 +146,9 @@ export default function ResultsPage() {
             <div className="flex items-center gap-2">
               <TrendingUp size={15} className="text-amber-500" />
               <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">Award Sweep</h2>
+              <Tooltip content="A 'sweep' is when one person wins more than one award." position="top">
+                <Info size={13} className="text-neutral-400 cursor-help" />
+              </Tooltip>
             </div>
             <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4">
               <SweepPanel sweep={sweep} />
