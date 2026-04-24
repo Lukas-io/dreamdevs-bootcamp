@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Plus, Users, Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function VotersPage() {
+  const { role } = useAuth();
   const [voters, setVoters] = useState<Voter[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -46,9 +48,11 @@ export default function VotersPage() {
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Voters</h1>
           <p className="text-sm text-neutral-500 mt-1">{active} active · {voters.length} total</p>
         </div>
-        <Button icon={<Plus size={14} />} onClick={() => setShowRegister(true)}>
-          Register Voter
-        </Button>
+        {role === "ADMIN" && (
+          <Button icon={<Plus size={14} />} onClick={() => setShowRegister(true)}>
+            Register Voter
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-2 items-center">
@@ -82,7 +86,7 @@ export default function VotersPage() {
           icon={<Users size={32} />}
           title={voters.length === 0 ? "No voters registered" : "No voters match your search"}
           description={voters.length === 0 ? "Register students so they can vote." : undefined}
-          action={voters.length === 0 ? (
+          action={voters.length === 0 && role === "ADMIN" ? (
             <Button icon={<Plus size={14} />} onClick={() => setShowRegister(true)}>
               Register Voter
             </Button>

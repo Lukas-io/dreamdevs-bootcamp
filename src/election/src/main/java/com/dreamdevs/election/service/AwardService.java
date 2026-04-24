@@ -3,11 +3,13 @@ package com.dreamdevs.election.service;
 import com.dreamdevs.election.exception.ElectionException;
 import com.dreamdevs.election.model.Award;
 import com.dreamdevs.election.model.AwardStatus;
+import com.dreamdevs.election.model.Nominee;
 import com.dreamdevs.election.repository.AwardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AwardService {
@@ -18,23 +20,23 @@ public class AwardService {
         this.awardRepository = awardRepository;
     }
 
-    public Award createAward(String title, List<String> nominees, boolean anonymous) {
+    public Award createAward(String title, List<Nominee> nominees, boolean anonymous) {
         if (title == null || title.isBlank()) {
             throw new ElectionException("Award title cannot be empty.");
         }
         if (nominees == null || nominees.isEmpty()) {
             throw new ElectionException("An award must have at least one nominee.");
         }
-        for (String nominee : nominees) {
-            if (nominee == null || nominee.isBlank()) {
+        for (Nominee nominee : nominees) {
+            if (nominee == null || nominee.getName() == null || nominee.getName().isBlank()) {
                 throw new ElectionException("Nominee names cannot be blank.");
             }
         }
-        if (new HashSet<>(nominees).size() < nominees.size()) {
+        List<String> names = nominees.stream().map(Nominee::getName).collect(Collectors.toList());
+        if (new HashSet<>(names).size() < names.size()) {
             throw new ElectionException("Nominee list contains duplicates.");
         }
-        Award award = new Award(title, nominees, anonymous);
-        return awardRepository.save(award);
+        return awardRepository.save(new Award(title, nominees, anonymous));
     }
 
     public Award getAward(String id) {

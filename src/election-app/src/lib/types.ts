@@ -1,9 +1,14 @@
 export type AwardStatus = "PENDING" | "OPEN" | "CLOSED";
 
+export interface Nominee {
+  name: string;
+  imageUrl?: string;
+}
+
 export interface Award {
   id: string;
   title: string;
-  nominees: string[];
+  nominees: Nominee[];
   status: AwardStatus;
   revealed: boolean;
   anonymous: boolean;
@@ -14,6 +19,7 @@ export interface Voter {
   name: string;
   studentId: string;
   active: boolean;
+  imageUrl?: string;
 }
 
 export interface Vote {
@@ -40,17 +46,23 @@ export interface WinnerResult {
 
 export interface CreateAwardBody {
   title: string;
-  nominees: string[];
+  nominees: Nominee[];
   anonymous?: boolean;
 }
 
 export interface RegisterVoterBody {
   name: string;
   studentId: string;
+  imageUrl?: string;
 }
 
 export interface CastVoteBody {
-  voterId: string;
   awardId: string;
   nomineeName: string;
+}
+
+export interface AuthState {
+  token: string;
+  role: "VOTER" | "ADMIN";
+  voter?: Voter;
 }

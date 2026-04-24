@@ -6,6 +6,7 @@ import { awardsApi } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useAuth } from "@/context/AuthContext";
 import { Lock, Eye, Play, Square, Trash2 } from "lucide-react";
 import { Tooltip } from "@/components/ui/Tooltip";
 
@@ -16,9 +17,12 @@ interface AwardActionsProps {
 }
 
 export function AwardActions({ award, onMutate, compact = false }: AwardActionsProps) {
+  const { role } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  if (role !== "ADMIN") return null;
 
   const act = async (action: string, fn: () => Promise<void>, successMsg: string) => {
     setLoading(action);

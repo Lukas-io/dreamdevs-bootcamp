@@ -34,7 +34,9 @@ public class VotingService {
         if (award.getStatus() == AwardStatus.CLOSED) {
             throw new ElectionException("Voting has already closed for '" + award.getTitle() + "'.");
         }
-        if (!award.getNominees().contains(nomineeName)) {
+        boolean validNominee = award.getNominees().stream()
+                .anyMatch(n -> n.getName().equals(nomineeName));
+        if (!validNominee) {
             throw new ElectionException("'" + nomineeName + "' is not a nominee for '" + award.getTitle() + "'.");
         }
         if (voteRepository.existsByVoterIdAndAwardId(voterId, awardId)) {

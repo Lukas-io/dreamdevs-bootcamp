@@ -2,6 +2,7 @@ package com.dreamdevs.election.service;
 
 import com.dreamdevs.election.exception.ElectionException;
 import com.dreamdevs.election.model.Award;
+import com.dreamdevs.election.model.Nominee;
 import com.dreamdevs.election.model.Vote;
 import com.dreamdevs.election.model.Voter;
 import com.dreamdevs.election.repository.AwardRepository;
@@ -37,7 +38,8 @@ class VotingServiceTest {
 
         tunde = voterService.registerVoter("Tunde Bakare", "STU001");
         amaka = voterService.registerVoter("Amaka Obi", "STU002");
-        award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Seun Kuti", "Bola Ade"), false);
+        award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Seun Kuti"), Nominee.of("Bola Ade")), false);
         awardService.openAward(award.getId());
     }
 
@@ -62,7 +64,8 @@ class VotingServiceTest {
 
     @Test
     void castVote_inPendingAward_throwsElectionException() {
-        Award pendingAward = awardService.createAward("Most Likely to Travel", List.of("Ngozi", "Emeka"), false);
+        Award pendingAward = awardService.createAward("Most Likely to Travel",
+                List.of(Nominee.of("Ngozi"), Nominee.of("Emeka")), false);
 
         assertThrows(ElectionException.class, () ->
                 votingService.castVote(tunde.getId(), pendingAward.getId(), "Ngozi")
@@ -96,7 +99,6 @@ class VotingServiceTest {
 
     @Test
     void castVote_selfVote_succeeds() {
-        // Tunde is both a voter and a nominee — self-voting is allowed
         Vote vote = votingService.castVote(tunde.getId(), award.getId(), "Tunde Bakare");
 
         assertNotNull(vote.getId());

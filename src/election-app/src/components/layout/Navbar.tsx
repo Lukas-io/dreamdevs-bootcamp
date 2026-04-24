@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Moon, Sun, Trophy, Users, Vote, BarChart, Home, Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Moon, Sun, Trophy, Users, Vote, BarChart, Home, Menu, X, LogOut, ShieldCheck } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 import { useState } from "react";
 
 const navLinks = [
@@ -16,11 +18,19 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { voter, role, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    router.push("/");
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800">
@@ -60,6 +70,45 @@ export function Navbar() {
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
+          {role === "VOTER" && voter && (
+            <div className="hidden sm:flex items-center gap-2">
+              <Avatar name={voter.name} imageUrl={voter.imageUrl} size="sm" />
+              <span className="text-xs text-neutral-600 dark:text-neutral-400 max-w-[80px] truncate">{voter.name}</span>
+              <button
+                onClick={handleLogout}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                aria-label="Sign out"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          )}
+
+          {role === "ADMIN" && (
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 rounded-lg">
+                <ShieldCheck size={12} />
+                Admin
+              </span>
+              <button
+                onClick={handleLogout}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                aria-label="Sign out"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          )}
+
+          {!role && (
+            <Link
+              href="/login"
+              className="hidden sm:flex items-center px-3 py-1.5 text-xs font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Sign in
+            </Link>
+          )}
+
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="sm:hidden p-2 rounded-lg text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
@@ -87,6 +136,23 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          {role ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-6 py-3.5 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors cursor-pointer"
+            >
+              <LogOut size={15} />
+              Sign out {role === "ADMIN" ? "(Admin)" : voter?.name ? `(${voter.name})` : ""}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 px-6 py-3.5 text-sm font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-colors"
+            >
+              Sign in
+            </Link>
+          )}
         </nav>
       )}
     </header>

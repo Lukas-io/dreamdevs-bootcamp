@@ -21,7 +21,7 @@ public class VoterController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Voter registerVoter(@RequestBody Map<String, String> body) {
-        return voterService.registerVoter(body.get("name"), body.get("studentId"));
+        return voterService.registerVoter(body.get("name"), body.get("studentId"), body.get("imageUrl"));
     }
 
     @GetMapping

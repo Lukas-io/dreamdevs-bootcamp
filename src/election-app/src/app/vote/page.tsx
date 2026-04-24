@@ -1,66 +1,67 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { awardsApi, votersApi, votesApi, resultsApi } from "@/lib/api";
-import { Award, Voter } from "@/lib/types";
-import { VoterSelect } from "@/components/vote/VoterSelect";
+import { useRouter } from "next/navigation";
+import { awardsApi, resultsApi, votesApi } from "@/lib/api";
+import { Award } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
 import { AwardSelect } from "@/components/vote/AwardSelect";
 import { NomineeSelect } from "@/components/vote/NomineeSelect";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/ToastProvider";
 import { CheckCircle, ChevronRight, ArrowLeft } from "lucide-react";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 export default function VotePage() {
+  const { voter, authLoading } = useAuth();
+  const router = useRouter();
   const { addToast } = useToast();
-  const [voters, setVoters] = useState<Voter[]>([]);
   const [awards, setAwards] = useState<Award[]>([]);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<Step>(1);
-  const [selectedVoter, setSelectedVoter] = useState<Voter | null>(null);
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
   const [votedAwardIds, setVotedAwardIds] = useState<string[]>([]);
   const [votingLoading, setVotingLoading] = useState(false);
 
+  useEffect(() => {
+    if (authLoading) return;
+    if (!voter) {
+      router.replace("/login?redirect=/vote");
+      return;
+    }
+    load();
+  }, [authLoading, voter]);
+
   const load = async () => {
+    if (!voter) return;
     setLoading(true);
-    const [v, a] = await Promise.all([
-      votersApi.list().catch(() => [] as Voter[]),
-      awardsApi.list().catch(() => [] as Award[]),
-    ]);
-    setVoters(v);
-    setAwards(a);
+    try {
+      const allAwards = await awardsApi.list();
+      setAwards(allAwards);
+
+      const open = allAwards.filter((a) => a.status === "OPEN" && !a.anonymous);
+      const results = await Promise.allSettled(
+        open.map(async (award) => {
+          const res = await resultsApi.forAward(award.id);
+          return res.votes?.some((v) => v.voterId === voter.id) ? award.id : null;
+        })
+      );
+      setVotedAwardIds(
+        results.flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []))
+      );
+    } catch (e) {
+      addToast(e instanceof Error ? e.message : "Failed to load awards", "error");
+    }
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
-
-  const handleVoterSelect = async (voter: Voter) => {
-    setSelectedVoter(voter);
-    setStep(2);
-    const open = awards.filter((a) => a.status === "OPEN" && !a.anonymous);
-    const results = await Promise.allSettled(
-      open.map(async (award) => {
-        const res = await resultsApi.forAward(award.id);
-        return res.votes?.some((v) => v.voterId === voter.id) ? award.id : null;
-      })
-    );
-    setVotedAwardIds(
-      results.flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []))
-    );
-  };
-
   const handleVote = async (nomineeName: string) => {
-    if (!selectedVoter || !selectedAward) return;
+    if (!selectedAward) return;
     setVotingLoading(true);
     try {
-      await votesApi.cast({
-        voterId: selectedVoter.id,
-        awardId: selectedAward.id,
-        nomineeName,
-      });
-      setStep(4);
+      await votesApi.cast({ awardId: selectedAward.id, nomineeName });
+      setStep(3);
     } catch (e) {
       addToast(e instanceof Error ? e.message : "Vote failed", "error");
     } finally {
@@ -70,26 +71,30 @@ export default function VotePage() {
 
   const reset = () => {
     setStep(1);
-    setSelectedVoter(null);
     setSelectedAward(null);
     setVotedAwardIds([]);
     load();
   };
 
   const steps = [
-    { num: 1, label: "Who are you?" },
-    { num: 2, label: "Choose award" },
-    { num: 3, label: "Cast vote" },
+    { num: 1, label: "Choose award" },
+    { num: 2, label: "Cast vote" },
   ];
+
+  if (authLoading || (!voter && !authLoading)) {
+    return <div className="flex justify-center py-32"><Spinner size={28} /></div>;
+  }
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8 flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Vote</h1>
-        <p className="text-sm text-neutral-500 mt-1">Cast your vote for a superlative award</p>
+        <p className="text-sm text-neutral-500 mt-1">
+          Voting as <span className="font-medium text-neutral-700 dark:text-neutral-300">{voter!.name}</span>
+        </p>
       </div>
 
-      {step !== 4 && (
+      {step !== 3 && (
         <div className="flex items-center gap-2">
           {steps.map((s, i) => (
             <div key={s.num} className="flex items-center gap-2">
@@ -111,7 +116,7 @@ export default function VotePage() {
 
       {loading ? (
         <div className="py-20"><Spinner size={28} /></div>
-      ) : step === 4 ? (
+      ) : step === 3 ? (
         <div className="flex flex-col items-center gap-5 py-16 text-center">
           <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
             <CheckCircle size={32} className="text-green-500" />
@@ -134,55 +139,24 @@ export default function VotePage() {
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5">
           {step === 1 && (
             <div className="flex flex-col gap-4">
-              <div>
-                <p className="text-sm font-semibold text-neutral-900 dark:text-white">Select your name</p>
-                <p className="text-xs text-neutral-400 mt-0.5">Find yourself in the voter registry</p>
-              </div>
-              <VoterSelect
-                voters={voters}
-                onSelect={handleVoterSelect}
-              />
-            </div>
-          )}
-
-          {step === 2 && selectedVoter && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">Choose an award</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">Voting as <span className="font-medium">{selectedVoter.name}</span></p>
-                </div>
-                <button onClick={() => setStep(1)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer">
-                  Change
-                </button>
-              </div>
+              <p className="text-sm font-semibold text-neutral-900 dark:text-white">Choose an award</p>
               <AwardSelect
                 awards={awards}
-                onSelect={(award) => {
-                  setSelectedAward(award);
-                  setStep(3);
-                }}
+                onSelect={(award) => { setSelectedAward(award); setStep(2); }}
                 votedAwardIds={votedAwardIds}
               />
             </div>
           )}
 
-          {step === 3 && selectedVoter && selectedAward && (
+          {step === 2 && selectedAward && (
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">{selectedAward.title}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">Voting as <span className="font-medium">{selectedVoter.name}</span></p>
-                </div>
-                <button onClick={() => setStep(2)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer">
+                <p className="text-sm font-semibold text-neutral-900 dark:text-white">{selectedAward.title}</p>
+                <button onClick={() => setStep(1)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer">
                   Back
                 </button>
               </div>
-              <NomineeSelect
-                award={selectedAward}
-                onVote={handleVote}
-                loading={votingLoading}
-              />
+              <NomineeSelect award={selectedAward} onVote={handleVote} loading={votingLoading} />
             </div>
           )}
         </div>
