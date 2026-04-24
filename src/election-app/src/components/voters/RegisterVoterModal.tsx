@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { ImageInput } from "@/components/ui/ImageInput";
 import { votersApi } from "@/lib/api";
 import { useToast } from "@/components/ui/ToastProvider";
 
@@ -17,11 +18,11 @@ export function RegisterVoterModal({ open, onClose, onRegistered }: RegisterVote
   const { addToast } = useToast();
   const [name, setName] = useState("");
   const [studentId, setStudentId] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; studentId?: string }>({});
 
-  const reset = () => { setName(""); setStudentId(""); setErrors({}); };
-
+  const reset = () => { setName(""); setStudentId(""); setImageUrl(""); setErrors({}); };
   const handleClose = () => { reset(); onClose(); };
 
   const handleSubmit = async () => {
@@ -32,7 +33,7 @@ export function RegisterVoterModal({ open, onClose, onRegistered }: RegisterVote
 
     setLoading(true);
     try {
-      await votersApi.register({ name: name.trim(), studentId: studentId.trim() });
+      await votersApi.register({ name: name.trim(), studentId: studentId.trim(), imageUrl: imageUrl.trim() || undefined });
       addToast(`${name} registered!`, "success");
       reset();
       onRegistered();
@@ -72,6 +73,14 @@ export function RegisterVoterModal({ open, onClose, onRegistered }: RegisterVote
           onChange={(e) => { setStudentId(e.target.value); setErrors((p) => ({ ...p, studentId: undefined })); }}
           error={errors.studentId}
         />
+        <div>
+          <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Profile Photo (optional)</p>
+          <ImageInput
+            value={imageUrl}
+            onChange={setImageUrl}
+            prompt={name.trim() ? `${name.trim()} student portrait` : undefined}
+          />
+        </div>
       </div>
     </Modal>
   );

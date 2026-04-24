@@ -103,7 +103,10 @@ export default function AwardDetailPage({ params }: { params: Promise<{ id: stri
             <Eye size={15} className="text-violet-500" />
             <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Winner</h2>
           </div>
-          <WinnerCard result={winner} />
+          <WinnerCard
+            result={winner}
+            winnerImageUrl={award.nominees.find((n) => n.name === winner.winner)?.imageUrl}
+          />
         </div>
       )}
 

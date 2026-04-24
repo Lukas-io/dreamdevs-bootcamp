@@ -2,6 +2,7 @@ package com.dreamdevs.election.service;
 
 import com.dreamdevs.election.exception.ElectionException;
 import com.dreamdevs.election.model.Award;
+import com.dreamdevs.election.model.Nominee;
 import com.dreamdevs.election.model.Voter;
 import com.dreamdevs.election.repository.AwardRepository;
 import com.dreamdevs.election.repository.VoteRepository;
@@ -43,11 +44,10 @@ class ResultsServiceTest {
         ngozi = voterService.registerVoter("Ngozi Eze", "STU004");
     }
 
-    // --- Results visibility ---
-
     @Test
     void getResults_forUnrevealedAward_returnsHiddenResults() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Tunde Bakare");
         awardService.closeAward(award.getId());
@@ -60,7 +60,8 @@ class ResultsServiceTest {
 
     @Test
     void getResults_afterReveal_returnsFullBreakdown() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Tunde Bakare");
         awardService.closeAward(award.getId());
@@ -74,7 +75,8 @@ class ResultsServiceTest {
 
     @Test
     void getResults_anonymousAward_hidesVoterIdentity() {
-        Award award = awardService.createAward("Most Likely to Get Married", List.of("Bisi", "Emeka"), true);
+        Award award = awardService.createAward("Most Likely to Get Married",
+                List.of(Nominee.of("Bisi"), Nominee.of("Emeka")), true);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Bisi");
         awardService.closeAward(award.getId());
@@ -87,11 +89,10 @@ class ResultsServiceTest {
         votes.forEach(v -> assertNull(v.get("voterId")));
     }
 
-    // --- Winner declaration ---
-
     @Test
     void declareWinner_withClearLeader_returnsWinner() {
-        Award award = awardService.createAward("Most Successful", List.of("Chidi", "Ngozi", "Emeka"), false);
+        Award award = awardService.createAward("Most Successful",
+                List.of(Nominee.of("Chidi"), Nominee.of("Ngozi"), Nominee.of("Emeka")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Chidi");
         votingService.castVote(amaka.getId(), award.getId(), "Chidi");
@@ -107,7 +108,8 @@ class ResultsServiceTest {
 
     @Test
     void declareWinner_onTie_returnsTieWithTiedNames() {
-        Award award = awardService.createAward("Most Likely to Travel", List.of("Bisi", "Kemi"), false);
+        Award award = awardService.createAward("Most Likely to Travel",
+                List.of(Nominee.of("Bisi"), Nominee.of("Kemi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Bisi");
         votingService.castVote(amaka.getId(), award.getId(), "Kemi");
@@ -124,7 +126,8 @@ class ResultsServiceTest {
 
     @Test
     void declareWinner_whenNoVotesCast_throwsElectionException() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed",
+                List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
         awardService.revealAward(award.getId());
@@ -134,7 +137,8 @@ class ResultsServiceTest {
 
     @Test
     void declareWinner_onUnrevealedAward_throwsElectionException() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed",
+                List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Kemi");
         awardService.closeAward(award.getId());
@@ -142,11 +146,10 @@ class ResultsServiceTest {
         assertThrows(ElectionException.class, () -> resultsService.declareWinner(award.getId()));
     }
 
-    // --- Stats ---
-
     @Test
     void getStats_returnsPercentageBreakdown() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Tunde Bakare");
         votingService.castVote(amaka.getId(), award.getId(), "Tunde Bakare");
@@ -163,19 +166,20 @@ class ResultsServiceTest {
 
     @Test
     void getStats_onUnrevealedAward_throwsElectionException() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
 
         assertThrows(ElectionException.class, () -> resultsService.getStats(award.getId()));
     }
 
-    // --- Class MVP ---
-
     @Test
     void getClassMvp_returnsPersonWithMostTotalVotes() {
-        Award award1 = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
-        Award award2 = awardService.createAward("Most Successful", List.of("Tunde Bakare", "Chidi Nwosu"), false);
+        Award award1 = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
+        Award award2 = awardService.createAward("Most Successful",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Chidi Nwosu")), false);
 
         awardService.openAward(award1.getId());
         votingService.castVote(tunde.getId(), award1.getId(), "Tunde Bakare");
@@ -189,9 +193,7 @@ class ResultsServiceTest {
         awardService.closeAward(award2.getId());
         awardService.revealAward(award2.getId());
 
-        String mvp = resultsService.getClassMvp();
-
-        assertEquals("Tunde Bakare", mvp);
+        assertEquals("Tunde Bakare", resultsService.getClassMvp());
     }
 
     @Test
@@ -199,12 +201,12 @@ class ResultsServiceTest {
         assertThrows(ElectionException.class, () -> resultsService.getClassMvp());
     }
 
-    // --- Sweep detection ---
-
     @Test
     void getSweep_returnsNomineeWinningMultipleAwards() {
-        Award award1 = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
-        Award award2 = awardService.createAward("Most Likely to Be Famous", List.of("Tunde Bakare", "Ngozi Eze"), false);
+        Award award1 = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
+        Award award2 = awardService.createAward("Most Likely to Be Famous",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Ngozi Eze")), false);
 
         awardService.openAward(award1.getId());
         votingService.castVote(tunde.getId(), award1.getId(), "Tunde Bakare");
@@ -226,8 +228,10 @@ class ResultsServiceTest {
 
     @Test
     void getSweep_whenNobodyWinsMultiple_returnsEmptyMap() {
-        Award award1 = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
-        Award award2 = awardService.createAward("Most Successful", List.of("Chidi Nwosu", "Ngozi Eze"), false);
+        Award award1 = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
+        Award award2 = awardService.createAward("Most Successful",
+                List.of(Nominee.of("Chidi Nwosu"), Nominee.of("Ngozi Eze")), false);
 
         awardService.openAward(award1.getId());
         votingService.castVote(tunde.getId(), award1.getId(), "Tunde Bakare");
@@ -239,35 +243,31 @@ class ResultsServiceTest {
         awardService.closeAward(award2.getId());
         awardService.revealAward(award2.getId());
 
-        Map<String, List<String>> sweep = resultsService.getSweep();
-
-        assertTrue(sweep.isEmpty());
+        assertTrue(resultsService.getSweep().isEmpty());
     }
-
-    // --- Most nominated ---
 
     @Test
     void getMostNominated_returnsPersonNominatedInMostAwards() {
-        awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi"), false);
-        awardService.createAward("Most Successful", List.of("Tunde Bakare", "Chidi Nwosu"), false);
-        awardService.createAward("Best Dressed", List.of("Tunde Bakare", "Ngozi Eze"), false);
-        awardService.createAward("Most Likely to Travel", List.of("Amaka Obi", "Ngozi Eze"), false);
+        awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi")), false);
+        awardService.createAward("Most Successful",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Chidi Nwosu")), false);
+        awardService.createAward("Best Dressed",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Ngozi Eze")), false);
+        awardService.createAward("Most Likely to Travel",
+                List.of(Nominee.of("Amaka Obi"), Nominee.of("Ngozi Eze")), false);
 
-        String mostNominated = resultsService.getMostNominated();
-
-        assertEquals("Tunde Bakare", mostNominated);
+        assertEquals("Tunde Bakare", resultsService.getMostNominated());
     }
-
-    // --- Underdog ---
 
     @Test
     void getUnderdogs_returnsNomineesWithExactlyOneVote() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde Bakare", "Amaka Obi", "Seun Kuti"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde Bakare"), Nominee.of("Amaka Obi"), Nominee.of("Seun Kuti")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Tunde Bakare");
         votingService.castVote(amaka.getId(), award.getId(), "Tunde Bakare");
         votingService.castVote(seun.getId(), award.getId(), "Amaka Obi");
-        // Seun Kuti gets 0 votes, Amaka gets 1 (underdog), Tunde gets 2
         awardService.closeAward(award.getId());
         awardService.revealAward(award.getId());
 
@@ -280,7 +280,8 @@ class ResultsServiceTest {
 
     @Test
     void getUnderdogs_whenNoOneHasExactlyOneVote_returnsEmptyForThatAward() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed",
+                List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
         votingService.castVote(tunde.getId(), award.getId(), "Kemi");
         votingService.castVote(amaka.getId(), award.getId(), "Kemi");
@@ -292,11 +293,10 @@ class ResultsServiceTest {
         assertTrue(underdogs.getOrDefault(award.getTitle(), List.of()).isEmpty());
     }
 
-    // --- Stats with no votes ---
-
     @Test
     void getStats_whenNoVotesCast_throwsElectionException() {
-        Award award = awardService.createAward("Empty Award", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Empty Award",
+                List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
         awardService.revealAward(award.getId());
