@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/layout/Navbar";
 
 const geistSans = Geist({
@@ -33,10 +34,12 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50">
         <ThemeProvider>
-          <ToastProvider>
-            <Navbar />
-            <main>{children}</main>
-          </ToastProvider>
+          <CartProvider>
+            <ToastProvider>
+              <Navbar />
+              <main>{children}</main>
+            </ToastProvider>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

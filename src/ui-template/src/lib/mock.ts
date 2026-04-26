@@ -1,4 +1,4 @@
-import { Item, User } from "@/lib/types";
+import { Item, User, Product, Order } from "@/lib/types";
 
 export const MOCK_ITEMS: Item[] = [
   {
@@ -65,4 +65,132 @@ export const MOCK_USERS: User[] = [
   { id: "u3", name: "Chisom Eze", email: "chisom@example.com" },
   { id: "u4", name: "Dana Müller", email: "dana@example.com" },
   { id: "u5", name: "Elan Ruiz", email: "elan@example.com" },
+];
+
+export const MOCK_PRODUCTS: Product[] = [
+  {
+    id: "p1",
+    name: "Wireless Noise-Cancelling Headphones",
+    description: "Premium over-ear headphones with 30-hour battery life, active noise cancellation, and studio-quality sound. Foldable design for easy travel.",
+    price: 249.99,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+    stock: 14,
+    createdAt: "2025-01-10T09:00:00Z",
+  },
+  {
+    id: "p2",
+    name: "Minimal Leather Wallet",
+    description: "Slim bifold wallet crafted from full-grain leather. Holds up to 8 cards with RFID blocking protection.",
+    price: 49.99,
+    category: "Accessories",
+    imageUrl: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&q=80",
+    stock: 42,
+    createdAt: "2025-01-15T10:00:00Z",
+  },
+  {
+    id: "p3",
+    name: "Organic Cotton Crew-Neck Tee",
+    description: "100% GOTS-certified organic cotton. Pre-shrunk, relaxed fit available in 12 colours. Ethically manufactured.",
+    price: 34.99,
+    category: "Clothing",
+    imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80",
+    stock: 88,
+    createdAt: "2025-01-20T08:00:00Z",
+  },
+  {
+    id: "p4",
+    name: "Cold Brew Coffee Kit",
+    description: "Everything you need for smooth, low-acid cold brew at home. Includes 1L glass carafe, reusable filter, and 250g of single-origin beans.",
+    price: 59.99,
+    category: "Food",
+    imageUrl: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80",
+    stock: 27,
+    createdAt: "2025-02-01T11:00:00Z",
+  },
+  {
+    id: "p5",
+    name: "Mechanical Keyboard — Tactile",
+    description: "Compact 75% layout with hot-swap switches, per-key RGB, and aluminium top case. Ships with tactile brown switches.",
+    price: 159.99,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80",
+    stock: 9,
+    createdAt: "2025-02-10T14:00:00Z",
+  },
+  {
+    id: "p6",
+    name: "Linen Throw Blanket",
+    description: "Stonewashed European linen throw, 130×170cm. Naturally temperature-regulating and gets softer with every wash.",
+    price: 89.99,
+    category: "Home",
+    imageUrl: "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=400&q=80",
+    stock: 31,
+    createdAt: "2025-02-15T09:00:00Z",
+  },
+  {
+    id: "p7",
+    name: "Stainless Steel Water Bottle",
+    description: "Double-wall vacuum insulated 750ml bottle. Keeps drinks cold 24h, hot 12h. BPA-free, leak-proof lid.",
+    price: 39.99,
+    category: "Accessories",
+    imageUrl: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80",
+    stock: 55,
+    createdAt: "2025-03-01T10:00:00Z",
+  },
+  {
+    id: "p8",
+    name: "Artisan Dark Chocolate Collection",
+    description: "Curated selection of six 70%+ single-origin dark chocolate bars sourced from small farms across West Africa and South America.",
+    price: 44.99,
+    category: "Food",
+    imageUrl: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&q=80",
+    stock: 0,
+    createdAt: "2025-03-05T08:00:00Z",
+  },
+  {
+    id: "p9",
+    name: "Merino Wool Running Socks",
+    description: "Cushioned merino wool socks with arch support and moisture-wicking knit. 3-pack, available in S/M/L.",
+    price: 29.99,
+    category: "Clothing",
+    imageUrl: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=400&q=80",
+    stock: 73,
+    createdAt: "2025-03-10T12:00:00Z",
+  },
+];
+
+export const MOCK_ORDERS: Order[] = [
+  {
+    id: "ord-001",
+    items: [
+      { productId: "p1", productName: "Wireless Noise-Cancelling Headphones", price: 249.99, quantity: 1 },
+      { productId: "p7", productName: "Stainless Steel Water Bottle", price: 39.99, quantity: 2 },
+    ],
+    total: 329.97,
+    status: "DELIVERED",
+    shippingAddress: "12 Adeola Odeku St, Victoria Island, Lagos",
+    createdAt: "2025-03-15T10:30:00Z",
+  },
+  {
+    id: "ord-002",
+    items: [
+      { productId: "p3", productName: "Organic Cotton Crew-Neck Tee", price: 34.99, quantity: 3 },
+    ],
+    total: 104.97,
+    status: "SHIPPED",
+    shippingAddress: "12 Adeola Odeku St, Victoria Island, Lagos",
+    createdAt: "2025-04-10T14:00:00Z",
+  },
+  {
+    id: "ord-003",
+    items: [
+      { productId: "p5", productName: "Mechanical Keyboard — Tactile", price: 159.99, quantity: 1 },
+      { productId: "p2", productName: "Minimal Leather Wallet", price: 49.99, quantity: 1 },
+    ],
+    total: 209.98,
+    status: "PROCESSING",
+    shippingAddress: "12 Adeola Odeku St, Victoria Island, Lagos",
+    createdAt: "2025-04-22T09:15:00Z",
+  },
 ];
