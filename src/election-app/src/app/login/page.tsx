@@ -101,7 +101,6 @@ function LoginContent() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "login", label: "Log In" },
     { key: "signup", label: "Sign Up" },
-    { key: "admin", label: "Admin" },
   ];
 
   const passwordField = (
