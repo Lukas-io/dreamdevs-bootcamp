@@ -4,19 +4,14 @@ import { useEffect, useState } from "react";
 import { votersApi } from "@/lib/api";
 import { Voter } from "@/lib/types";
 import { VoterCard } from "@/components/voters/VoterCard";
-import { RegisterVoterModal } from "@/components/voters/RegisterVoterModal";
-import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Plus, Users, Search } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { Users, Search } from "lucide-react";
 
 export default function VotersPage() {
-  const { role } = useAuth();
   const [voters, setVoters] = useState<Voter[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [showRegister, setShowRegister] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
 
   const load = async () => {
@@ -43,16 +38,9 @@ export default function VotersPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Voters</h1>
-          <p className="text-sm text-neutral-500 mt-1">{active} active · {voters.length} total</p>
-        </div>
-        {role === "ADMIN" && (
-          <Button icon={<Plus size={14} />} onClick={() => setShowRegister(true)}>
-            Register Voter
-          </Button>
-        )}
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Voters</h1>
+        <p className="text-sm text-neutral-500 mt-1">{active} active · {voters.length} total</p>
       </div>
 
       <div className="flex gap-2 items-center">
@@ -84,13 +72,8 @@ export default function VotersPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<Users size={32} />}
-          title={voters.length === 0 ? "No voters registered" : "No voters match your search"}
-          description={voters.length === 0 ? "Register students so they can vote." : undefined}
-          action={voters.length === 0 && role === "ADMIN" ? (
-            <Button icon={<Plus size={14} />} onClick={() => setShowRegister(true)}>
-              Register Voter
-            </Button>
-          ) : undefined}
+          title={voters.length === 0 ? "No voters yet" : "No voters match your search"}
+          description={voters.length === 0 ? "Voters will appear here after they sign up." : undefined}
         />
       ) : (
         <div className="flex flex-col gap-2">
@@ -99,12 +82,6 @@ export default function VotersPage() {
           ))}
         </div>
       )}
-
-      <RegisterVoterModal
-        open={showRegister}
-        onClose={() => setShowRegister(false)}
-        onRegistered={load}
-      />
     </div>
   );
 }
