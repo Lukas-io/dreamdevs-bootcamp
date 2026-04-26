@@ -5,8 +5,10 @@ import { Voter } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Avatar } from "@/components/ui/Avatar";
 import { votersApi } from "@/lib/api";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useAuth } from "@/context/AuthContext";
 import { UserX } from "lucide-react";
 
 interface VoterCardProps {
@@ -15,6 +17,7 @@ interface VoterCardProps {
 }
 
 export function VoterCard({ voter, onMutate }: VoterCardProps) {
+  const { role } = useAuth();
   const { addToast } = useToast();
   const [confirm, setConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,15 +39,18 @@ export function VoterCard({ voter, onMutate }: VoterCardProps) {
   return (
     <>
       <div className="flex items-center justify-between py-3 px-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl">
-        <div className="flex flex-col gap-0.5">
-          <span className={`text-sm font-medium ${voter.active ? "text-neutral-900 dark:text-white" : "text-neutral-400 line-through"}`}>
-            {voter.name}
-          </span>
-          <span className="text-xs text-neutral-400">{voter.studentId}</span>
+        <div className="flex items-center gap-3">
+          <Avatar name={voter.name} imageUrl={voter.imageUrl} size="sm" />
+          <div className="flex flex-col gap-0.5">
+            <span className={`text-sm font-medium ${voter.active ? "text-neutral-900 dark:text-white" : "text-neutral-400 line-through"}`}>
+              {voter.name}
+            </span>
+            <span className="text-xs text-neutral-400">{voter.studentId}</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={voter.active ? "active" : "inactive"} label={voter.active ? "Active" : "Inactive"} />
-          {voter.active && (
+          {role === "ADMIN" && voter.active && (
             <Button
               size="sm"
               variant="ghost"

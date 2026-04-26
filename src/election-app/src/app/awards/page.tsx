@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Plus, Trophy, ChevronRight as Chevron } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 type Filter = "ALL" | "PENDING" | "OPEN" | "CLOSED" | "REVEALED";
 
 export default function AwardsPage() {
+  const { role } = useAuth();
   const [awards, setAwards] = useState<Award[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("ALL");
@@ -48,9 +50,11 @@ export default function AwardsPage() {
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Awards</h1>
           <p className="text-sm text-neutral-500 mt-1">Create and manage superlative awards</p>
         </div>
-        <Button icon={<Plus size={14} />} onClick={() => setShowCreate(true)}>
-          Create Award
-        </Button>
+        {role === "ADMIN" && (
+          <Button icon={<Plus size={14} />} onClick={() => setShowCreate(true)}>
+            Create Award
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-1 text-xs text-neutral-400 flex-wrap">
@@ -87,7 +91,7 @@ export default function AwardsPage() {
           title={filter === "ALL" ? "No awards yet" : `No ${filter.toLowerCase()} awards`}
           description={filter === "ALL" ? "Create your first award to get started." : undefined}
           action={
-            filter === "ALL" ? (
+            filter === "ALL" && role === "ADMIN" ? (
               <Button icon={<Plus size={14} />} onClick={() => setShowCreate(true)}>
                 Create Award
               </Button>

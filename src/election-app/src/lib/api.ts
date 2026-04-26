@@ -8,19 +8,41 @@ import type {
   RegisterVoterBody,
   CastVoteBody,
 } from "./types";
+import { getToken } from "./auth";
 
 const BASE = "/api";
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options?.headers as Record<string, string>),
+    },
   });
   if (res.status === 204) return undefined as T;
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
   return data as T;
 }
+
+export const authApi = {
+  signup: (body: {
+    name: string;
+    studentId: string;
+    password: string;
+    imageUrl?: string;
+  }): Promise<{ token: string; voter: Voter }> =>
+    apiFetch("/auth/signup", { method: "POST", body: JSON.stringify(body) }),
+
+  login: (studentId: string, password: string): Promise<{ token: string; voter: Voter }> =>
+    apiFetch("/auth/login", { method: "POST", body: JSON.stringify({ studentId, password }) }),
+
+  adminLogin: (username: string, password: string): Promise<{ token: string }> =>
+    apiFetch("/auth/admin/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+};
 
 export const awardsApi = {
   list: (): Promise<Award[]> => apiFetch("/awards"),
@@ -65,4 +87,9 @@ export const resultsApi = {
   underdogs: (): Promise<Record<string, string[]>> =>
     apiFetch("/results/underdogs"),
   summary: (): Promise<{ summary: string }> => apiFetch("/results/summary"),
+};
+
+export const imageGenApi = {
+  generate: (prompt: string, theme: string): Promise<{ imageUrl: string }> =>
+    apiFetch("/image-gen", { method: "POST", body: JSON.stringify({ prompt, theme }) }),
 };

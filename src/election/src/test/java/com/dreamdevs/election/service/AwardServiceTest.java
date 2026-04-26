@@ -3,10 +3,12 @@ package com.dreamdevs.election.service;
 import com.dreamdevs.election.exception.ElectionException;
 import com.dreamdevs.election.model.Award;
 import com.dreamdevs.election.model.AwardStatus;
+import com.dreamdevs.election.model.Nominee;
 import com.dreamdevs.election.repository.AwardRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +27,8 @@ class AwardServiceTest {
 
     @Test
     void createAward_withValidData_succeeds() {
-        Award award = awardService.createAward("Class Clown", List.of("Tunde", "Amaka", "Seun"), false);
+        Award award = awardService.createAward("Class Clown",
+                List.of(Nominee.of("Tunde"), Nominee.of("Amaka"), Nominee.of("Seun")), false);
 
         assertNotNull(award.getId());
         assertEquals("Class Clown", award.getTitle());
@@ -37,14 +40,14 @@ class AwardServiceTest {
     @Test
     void createAward_withEmptyTitle_throwsElectionException() {
         assertThrows(ElectionException.class, () ->
-                awardService.createAward("", List.of("Tunde", "Amaka"), false)
+                awardService.createAward("", List.of(Nominee.of("Tunde"), Nominee.of("Amaka")), false)
         );
     }
 
     @Test
     void createAward_withBlankTitle_throwsElectionException() {
         assertThrows(ElectionException.class, () ->
-                awardService.createAward("   ", List.of("Tunde", "Amaka"), false)
+                awardService.createAward("   ", List.of(Nominee.of("Tunde"), Nominee.of("Amaka")), false)
         );
     }
 
@@ -65,15 +68,15 @@ class AwardServiceTest {
     @Test
     void createAward_withBlankNomineeName_throwsElectionException() {
         assertThrows(ElectionException.class, () ->
-                awardService.createAward("Best Dressed", List.of("  ", "Valid Name"), false)
+                awardService.createAward("Best Dressed", List.of(new Nominee("  ", null), Nominee.of("Valid Name")), false)
         );
     }
 
     @Test
     void createAward_withNullNomineeName_throwsElectionException() {
-        List<String> nominees = new java.util.ArrayList<>();
-        nominees.add(null);
-        nominees.add("Valid Name");
+        List<Nominee> nominees = new ArrayList<>();
+        nominees.add(new Nominee(null, null));
+        nominees.add(Nominee.of("Valid Name"));
         assertThrows(ElectionException.class, () ->
                 awardService.createAward("Best Dressed", nominees, false)
         );
@@ -81,7 +84,7 @@ class AwardServiceTest {
 
     @Test
     void openAward_changeStatusToOpen() {
-        Award award = awardService.createAward("Most Successful", List.of("Chidi", "Ngozi"), false);
+        Award award = awardService.createAward("Most Successful", List.of(Nominee.of("Chidi"), Nominee.of("Ngozi")), false);
 
         awardService.openAward(award.getId());
 
@@ -90,7 +93,7 @@ class AwardServiceTest {
 
     @Test
     void openAward_thatIsAlreadyOpen_throwsElectionException() {
-        Award award = awardService.createAward("Most Successful", List.of("Chidi", "Ngozi"), false);
+        Award award = awardService.createAward("Most Successful", List.of(Nominee.of("Chidi"), Nominee.of("Ngozi")), false);
         awardService.openAward(award.getId());
 
         assertThrows(ElectionException.class, () -> awardService.openAward(award.getId()));
@@ -98,7 +101,7 @@ class AwardServiceTest {
 
     @Test
     void openAward_thatIsClosed_throwsElectionException() {
-        Award award = awardService.createAward("Most Successful", List.of("Chidi", "Ngozi"), false);
+        Award award = awardService.createAward("Most Successful", List.of(Nominee.of("Chidi"), Nominee.of("Ngozi")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
 
@@ -107,7 +110,7 @@ class AwardServiceTest {
 
     @Test
     void closeAward_changeStatusToClosed() {
-        Award award = awardService.createAward("Most Likely to Get Married", List.of("Bisi", "Emeka"), false);
+        Award award = awardService.createAward("Most Likely to Get Married", List.of(Nominee.of("Bisi"), Nominee.of("Emeka")), false);
         awardService.openAward(award.getId());
 
         awardService.closeAward(award.getId());
@@ -117,14 +120,14 @@ class AwardServiceTest {
 
     @Test
     void closeAward_thatIsPending_throwsElectionException() {
-        Award award = awardService.createAward("Most Likely to Get Married", List.of("Bisi", "Emeka"), false);
+        Award award = awardService.createAward("Most Likely to Get Married", List.of(Nominee.of("Bisi"), Nominee.of("Emeka")), false);
 
         assertThrows(ElectionException.class, () -> awardService.closeAward(award.getId()));
     }
 
     @Test
     void closeAward_thatIsAlreadyClosed_throwsElectionException() {
-        Award award = awardService.createAward("Most Likely to Get Married", List.of("Bisi", "Emeka"), false);
+        Award award = awardService.createAward("Most Likely to Get Married", List.of(Nominee.of("Bisi"), Nominee.of("Emeka")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
 
@@ -133,7 +136,7 @@ class AwardServiceTest {
 
     @Test
     void deleteAward_thatIsPending_succeeds() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed", List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
 
         awardService.deleteAward(award.getId());
 
@@ -142,7 +145,7 @@ class AwardServiceTest {
 
     @Test
     void deleteAward_thatIsOpen_throwsElectionException() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed", List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
 
         assertThrows(ElectionException.class, () -> awardService.deleteAward(award.getId()));
@@ -150,7 +153,7 @@ class AwardServiceTest {
 
     @Test
     void deleteAward_thatIsClosed_throwsElectionException() {
-        Award award = awardService.createAward("Best Dressed", List.of("Kemi", "Femi"), false);
+        Award award = awardService.createAward("Best Dressed", List.of(Nominee.of("Kemi"), Nominee.of("Femi")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
 
@@ -164,15 +167,15 @@ class AwardServiceTest {
 
     @Test
     void listAwards_returnsAllCreatedAwards() {
-        awardService.createAward("Class Clown", List.of("Tunde"), false);
-        awardService.createAward("Most Successful", List.of("Amaka"), false);
+        awardService.createAward("Class Clown", List.of(Nominee.of("Tunde")), false);
+        awardService.createAward("Most Successful", List.of(Nominee.of("Amaka")), false);
 
         assertEquals(2, awardService.listAwards().size());
     }
 
     @Test
     void revealAward_flipsRevealedFlag() {
-        Award award = awardService.createAward("Most Likely to Be Famous", List.of("Sola", "Taiwo"), false);
+        Award award = awardService.createAward("Most Likely to Be Famous", List.of(Nominee.of("Sola"), Nominee.of("Taiwo")), false);
         awardService.openAward(award.getId());
         awardService.closeAward(award.getId());
 
@@ -183,7 +186,7 @@ class AwardServiceTest {
 
     @Test
     void revealAward_thatIsNotClosed_throwsElectionException() {
-        Award award = awardService.createAward("Most Likely to Be Famous", List.of("Sola", "Taiwo"), false);
+        Award award = awardService.createAward("Most Likely to Be Famous", List.of(Nominee.of("Sola"), Nominee.of("Taiwo")), false);
         awardService.openAward(award.getId());
 
         assertThrows(ElectionException.class, () -> awardService.revealAward(award.getId()));

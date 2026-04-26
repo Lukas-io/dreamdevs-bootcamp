@@ -3,6 +3,7 @@ package com.dreamdevs.election.service;
 import com.dreamdevs.election.exception.ElectionException;
 import com.dreamdevs.election.model.Award;
 import com.dreamdevs.election.model.AwardStatus;
+import com.dreamdevs.election.model.Nominee;
 import com.dreamdevs.election.model.Vote;
 import com.dreamdevs.election.repository.VoteRepository;
 import org.springframework.stereotype.Service;
@@ -137,14 +138,12 @@ public class ResultsService {
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 
-            // In a tie, no single winner — skip for sweep purposes
             if (winners.size() == 1) {
                 String winner = winners.get(0);
                 nomineeToAwardTitles.computeIfAbsent(winner, k -> new ArrayList<>()).add(award.getTitle());
             }
         }
 
-        // Return only those who won more than one award
         return nomineeToAwardTitles.entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -155,8 +154,11 @@ public class ResultsService {
 
         Map<String, Long> nominationCount = new HashMap<>();
         for (Award award : awards) {
-            for (String nominee : new HashSet<>(award.getNominees())) {
-                nominationCount.merge(nominee, 1L, Long::sum);
+            Set<String> uniqueNames = award.getNominees().stream()
+                    .map(Nominee::getName)
+                    .collect(Collectors.toSet());
+            for (String name : uniqueNames) {
+                nominationCount.merge(name, 1L, Long::sum);
             }
         }
 
